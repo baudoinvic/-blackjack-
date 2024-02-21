@@ -1,43 +1,37 @@
+import os
 import requests
 import cv2 as cv
-import os
-import matplotlib.pyplot as plt
 import numpy as np
-
-card_images = []
+import matplotlib.pyplot as plt
 
 def load_image():
-  image_name = 'cards.jpg'
-  vsplit_number = 4
-  hsplit_number = 13
-  
-  if not os.path.isfile(image_name):
-    response = requests.get('http://3156.bz/techgym/cards.jpg', allow_redirects=False)
-    with open(image_name, 'wb') as image:
-      image.write(response.content)
-   
-  img = cv.imread('./'+image_name)
-  img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
- 
-  h, w = img.shape[:2]
-  crop_img = img[:h // vsplit_number * vsplit_number, :w // hsplit_number * hsplit_number]
-  
-  card_images.clear()
-  for h_image in np.vsplit(crop_img, vsplit_number):
-    for v_image in np.hsplit(h_image, hsplit_number):
-      card_images.append(v_image)
+    image_name = 'cards.jpg'
 
-def play():
-  load_image()
-  show_test()
+    if not os.path.isfile(image_name):
+        try:
+            response = requests.get('http://3156.bz/techgym/cards.jpg', allow_redirects=False)
+            if response.status_code == 200:
+                with open(image_name, 'wb') as image:
+                    image.write(response.content)
+            else:
+                raise Exception("Failed to download image")
+        except Exception as e:
+            print("Error downloading image:", e)
+            return []
 
-def show_test():
-  plt.subplot(1,6,1)
-  plt.axis("off")
-  plt.imshow(card_images[5])
-  plt.subplot(1,6,2)
-  plt.axis("off")
-  plt.imshow(card_images[6])
-  plt.show()
+    try:
+        img = cv.imread(image_name)
+        if img is None:
+            raise Exception("Failed to load image")
 
-play()
+        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.show()
+
+    except Exception as e:
+        print("Error processing image:", e)
+
+# Test the function
+if __name__ == "__main__":
+    load_image()

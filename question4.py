@@ -1,22 +1,29 @@
 import requests
 import cv2 as cv
+import os
+import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 card_images = []
+cards = []
 
 def load_image():
-    image_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScKDX9BRB4wMhtx5hTqQ2fj88_T4wIqTmjDA&usqp=CAU'
-
-    response = requests.get(image_url)
-    image_array = np.frombuffer(response.content, np.uint8)
-    img = cv.imdecode(image_array, cv.IMREAD_COLOR)
-    img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-
+    image_name = 'cards.jpg'
     vsplit_number = 4
     hsplit_number = 13
+  
+    if not os.path.isfile(image_name):
+        response = requests.get('http://3156.bz/techgym/cards.jpg', allow_redirects=False)
+        with open(image_name, 'wb') as image:
+            image.write(response.content)
+   
+    img = cv.imread('./'+image_name)
+    img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+ 
     h, w = img.shape[:2]
     crop_img = img[:h // vsplit_number * vsplit_number, :w // hsplit_number * hsplit_number]
-
+  
     card_images.clear()
     for h_image in np.vsplit(crop_img, vsplit_number):
         for v_image in np.hsplit(h_image, hsplit_number):
@@ -29,8 +36,31 @@ class Card:
         self.number = number
         self.image = image
 
+def create_cards():
+    cards.clear()
+    marks = ['Hearts', 'Spades', 'Diamonds', 'Clubs']
+    display_names = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
+    numbers = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+
+    for i, mark in enumerate(marks):
+        for j, number in enumerate(numbers):
+            cards.append( Card(mark, display_names[j], number, card_images[i*len(numbers)+j]) )
+
+def show_cards(card):
+    print(card.display_name, "of", card.mark)
+    plt.imshow(card.image)
+    plt.axis('off')
+    plt.show()
+
 def play():
     print('Debug: play()')
     load_image()
+    create_cards()
+
+    # Select a random card
+    random_card = random.choice(cards)
+    
+    # Show the selected card
+    show_cards(random_card)
 
 play()
