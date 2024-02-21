@@ -13,7 +13,7 @@ def load_image():
   hsplit_number = 13
   
   if not os.path.isfile(image_name):
-    response = requests.get('http://3156.bz/techgym/cards.jpg', allow_redirects=False)
+    response = requests.get('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScKDX9BRB4wMhtx5hTqQ2fj88_T4wIqTmjDA&usqp=CAU', allow_redirects=False)
     with open(image_name, 'wb') as image:
       image.write(response.content)
    
